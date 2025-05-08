@@ -5,6 +5,7 @@
     - [X] User is able to upload CSV and XLSX file
     - [X] User have a JSON response with the content paginated
     - [X] User have a JSON response with the total of lines in the CSV/Excel in files with big amount of lines
+    - [ ] When the user upload the file, the JSON is saved as a document in MongoDB
     - [ ] User can pass custom pagination and per page items limit
 - [ ] Create the File Upload History route
     - [ ] Add support for filter by filename and reference date
