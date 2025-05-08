@@ -1,6 +1,6 @@
 ### Roadmap
-- [ ] Prepare and deploy MongoDB docker container with MongoExpress using Docker Compose
-- [ ] Integrate MongoDB docker container as the database of the Laravel application
+- [X] Prepare and deploy MongoDB docker container with MongoExpress using Docker Compose
+- [X] Integrate MongoDB docker container as the database of the Laravel application
 - [ ] Create the CSV/Excel file uploader route
     - [X] User is able to upload CSV and XLSX file
     - [X] User have a JSON response with the content paginated
