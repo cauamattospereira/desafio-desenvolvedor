@@ -86,6 +86,7 @@ class FileController extends Controller
         return response()->json(['error' => 'No file uploaded'], 400);
     }
 
+    // #TODO move this function to a helper folder
     private function countCsvLines($path)
     {
         $lineCount = 0;
