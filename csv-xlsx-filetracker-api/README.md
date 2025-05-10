@@ -7,6 +7,7 @@
     - [X] User have a JSON response with the total of lines in the CSV/Excel in files with big amount of lines
     - [ ] When the user upload the file, the JSON is saved as a document in MongoDB
     - [ ] User can pass custom pagination and per page items limit
+    - [ ] Add a validation to consider invalid lines in the file
 - [ ] Create the File Upload History route
     - [ ] Add support for filter by filename and reference date
 - [ ] Create the Search Content route
