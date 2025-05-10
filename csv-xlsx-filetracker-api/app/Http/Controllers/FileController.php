@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\File;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SebastianBergmann\CodeCoverage\Report\Xml\Totals;
@@ -18,72 +19,89 @@ class FileController extends Controller
     }
 
     /**
-     * Function for uploading an object
+     * Function for uploading a CSV/Excel file
      */
     public function upload(Request $request)
     {
-        // $request->validate([
-        //     'file' => 'required|file|mimes:csv,xlsx|max:102400'
-        // ]);
+        if ($request->hasFile('file') == false) {
+            return response()->json(
+                [
+                    'error' => "No valid file is found with 'file' key",
+                    'message' => 'Please, upload a valid CSV or Excel file in a form data'
+                ],
+                400
+            );
+        }
 
         $file = $request->file('file');
 
-        if ($file) {
-            $path = $file->getRealPath();
-            $csvFile = fopen($path, 'r');
+        $path = $file->getRealPath();
+        $csvFile = fopen($path, 'r');
 
-            $data = [];
+        $currentRow = 0;
+        $page = $request->input('page', 1);
+        $perPage = 100;
+        $offset = ($page - 1) * $perPage;
+        $data = [];
 
-            /**
-             *  fgetcsv is called here to move the internal pointer to the next line and
-             *  desconsider the first line of the csv with 'Status do Arquivo: Final'
-             *  content
-             * */
-            fgetcsv($csvFile, null, ';');
+        /**
+         *  fgetcsv is called here to move the internal pointer to the next line and
+         *  desconsider the first line of the csv with 'Status do Arquivo: Final'
+         *  content
+         * */
+        fgetcsv($csvFile, null, ';');
 
-            $header = fgetcsv($csvFile, null, ';');
+        /**
+         * get header and row content of the current line of the csv/excel file
+         */
+        $header = fgetcsv($csvFile, null, ';');
+        $row = fgetcsv($csvFile, null, ';');
 
-            $row = fgetcsv($csvFile, null, ';');
-
-            $currentRow = 0;
-            $page = $request->input('page', 1);
-            $perPage = 10;
-            // #TODO add $page value
-            $offset = ($page - 1) * $perPage;
-
-
-            while ($row !== false) {
-                if ($currentRow >= $offset && $currentRow < $offset + $perPage) {
-                    $data[] = array_combine($header, $row);
-                }
-
-                $currentRow++;
-
-                if ($currentRow >= $offset + $perPage) {
-                    break;
-                }
-            }
-
-            fclose($csvFile);
-
-
-            $totalLines = $this->countCsvLines($path);
-            $dataLines = $totalLines - 2;
-
-            $itemsPerPage = (int) ($request->get('per_page', $perPage));
-            $totalPages = ceil($dataLines / $itemsPerPage);
-
-
-            return response()->json([
-                'message' => 'File uploaded successfully',
-                'data' => $data,
-                'page' => $page,
-                'perPage' => $itemsPerPage,
-                'totalPages' => $totalPages,
-            ]);
+        /**
+         * feed the $data variable with the content of the csv/excel file
+         */
+        while ($currentRow < 100000) {
+            $data[] = array_combine($header, $row);
+            $currentRow++;
         }
 
-        return response()->json(['error' => 'No file uploaded'], 400);
+        fclose($csvFile);
+
+        $documentOriginalName = $file->getClientOriginalName();
+        $newFileName = date('Y-h-d_His') . '_' . $file->getClientOriginalName();
+        $documentOriginalExtension = $file->getClientOriginalExtension();
+        $uploadedAt = Carbon::now();
+        $fileSize = $file->getSize();
+        $totalLines = $this->countCsvLines($path);
+        $dataLines = $totalLines - 2;
+        $itemsPerPage = (int) ($request->get('per_page', $perPage));
+        $totalPages = ceil($dataLines / $itemsPerPage);
+
+        $storedFile = [
+            'uploaded_metadata' => [
+                "original_filename" => $documentOriginalName,
+                "stored_as" => $newFileName,
+                "uploaded_at" => $uploadedAt,
+                "file_size" => $fileSize,
+                "extension" => $documentOriginalExtension
+            ],
+            'processing_info' => [
+                'total_lines' => $totalLines,
+                'valid_lines' => $dataLines,
+                'invalid_lines' => '0 [FAKE]',
+                'processing_time_ms' => '1532 [FAKE]'
+            ],
+            'data' => $data,
+        ];
+
+        File::create($storedFile);
+
+        return response()->json([
+            'message' => 'File uploaded successfully',
+            'data' => $storedFile,
+            'status' => 201,
+            'success' => true,
+        ], 201);
     }
 
     // #TODO move this function to a helper folder
