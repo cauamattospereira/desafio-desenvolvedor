@@ -60,7 +60,7 @@ class FileController extends Controller
         /**
          * feed the $data variable with the content of the csv/excel file
          */
-        while ($currentRow < 100000) {
+        while ($currentRow < 10000) {
             $data[] = array_combine($header, $row);
             $currentRow++;
         }
