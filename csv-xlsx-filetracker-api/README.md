@@ -5,7 +5,8 @@
     - [X] User is able to upload CSV and XLSX file
     - [X] User have a JSON response with the content paginated
     - [X] User have a JSON response with the total of lines in the CSV/Excel in files with big amount of lines
-    - [ ] When the user upload the file, the JSON is saved as a document in MongoDB
+    - [X] When the user upload the file, the JSON is saved as a document in MongoDB
+    - [ ] Implement GridFS for files largen than 16mb (MongoDB limit per document)
     - [ ] User can pass custom pagination and per page items limit
     - [ ] Add a validation to consider invalid lines in the file
 - [ ] Create the File Upload History route
