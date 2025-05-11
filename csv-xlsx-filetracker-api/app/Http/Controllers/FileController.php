@@ -49,12 +49,6 @@ class FileController extends Controller
             ], 409);
         }
 
-
-
-        // if (File::find($file->getClientOriginalName())) {
-        //     return ...
-        // }
-
         $path = $file->getRealPath();
         $csvFile = fopen($path, 'r');
 
