@@ -1,16 +1,16 @@
 ### Roadmap
 - [X] Prepare and deploy MongoDB docker container with MongoExpress using Docker Compose
 - [X] Integrate MongoDB docker container as the database of the Laravel application
-- [ ] Create the CSV/Excel file uploader route
+- [X] Create the CSV/Excel file uploader route
     - [X] User is able to upload CSV and XLSX file
     - [X] User have a JSON response with the content paginated
     - [X] User have a JSON response with the total of lines in the CSV/Excel in files with big amount of lines
     - [X] When the user upload the file, the JSON is saved as a document in MongoDB
-    - [ ] Implement GridFS for files largen than 16mb (MongoDB limit per document)
-    - [ ] User can pass custom pagination and per page items limit
-    - [ ] Add a validation to consider invalid lines in the file
+    - [X] Store chunks of files with more than 10000 lines
+    - [X] Add a validation to consider invalid lines in the file
 - [ ] Create the File Upload History route
     - [ ] Add support for filter by filename and reference date
 - [ ] Create the Search Content route
+    - [ ] User can pass custom pagination and per page items limit
     - [ ] Support filters for `TckrSymb` (Ticker Symbol) and `RptDt` (Report Date)
 - [ ] Implement authentication
