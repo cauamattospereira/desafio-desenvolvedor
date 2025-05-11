@@ -9,11 +9,39 @@ use Illuminate\Http\Request;
 class FileController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * 
      */
-    public function index()
+    public function history(Request $request)
     {
-        //
+        $perPage = $request->input('per_page', 50);
+        $searchOriginalFilename = $request->input('filename', null);
+        $searchUploadDateBrasiliaLocalTime = $request->input('uploadDateBrasilia', null);
+        $searchUploadDateUtc = $request->input('uploadDateUtc', null);
+
+        if ($searchOriginalFilename !== null) {
+            
+        }
+
+        $paginated = File::orderBy('upload_date_brasilia_local_time', 'desc')
+            ->paginate($perPage)
+            ->through(fn($item) => $item->makeHidden(['data', 'uploaded_metadata', 'processing_info']));
+
+        return response()->json([
+            'message' => 'Uploaded File History queried successfully',
+            'items' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+                'last_page' => $paginated->lastPage(),
+                'next_page_url' => $paginated->nextPageUrl(),
+                'prev_page_url' => $paginated->previousPageUrl(),
+                'from' => $paginated->firstItem(),
+                'to' => $paginated->lastItem(),
+            ],
+            'status' => 200,
+            'success' => true,
+        ]);
     }
 
     /**
