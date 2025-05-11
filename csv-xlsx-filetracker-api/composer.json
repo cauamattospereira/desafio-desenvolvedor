@@ -13,7 +13,6 @@
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
-        "league/flysystem-gridfs": "^3.29",
         "mongodb/laravel-mongodb": "^5.3",
         "mongodb/mongodb": "^1.3"
     },

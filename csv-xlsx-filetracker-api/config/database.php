@@ -115,7 +115,12 @@ return [
         'mongodb' => [
             'driver' => 'mongodb',
             'dsn' => env('DB_URI'),
-            'database' => 'filetracker-api-service'
+            'database' => 'filetracker-api-service',
+            'username' => env('DB_USERNAME'),
+            'password' => env('DB_PASSWORD'),
+            'options'  => [
+                'authSource' => 'admin',
+            ],
         ]
 
     ],

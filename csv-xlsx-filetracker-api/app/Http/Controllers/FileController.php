@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use SebastianBergmann\CodeCoverage\Report\Xml\Totals;
 
 class FileController extends Controller
 {
@@ -65,8 +63,9 @@ class FileController extends Controller
             $currentRow++;
         }
 
-        fclose($csvFile);
-
+        /**
+         * upload metadata
+         */
         $documentOriginalName = $file->getClientOriginalName();
         $newFileName = date('Y-h-d_His') . '_' . $file->getClientOriginalName();
         $documentOriginalExtension = $file->getClientOriginalExtension();
@@ -93,6 +92,9 @@ class FileController extends Controller
             ],
             'data' => $data,
         ];
+
+
+        fclose($csvFile);
 
         File::create($storedFile);
 
