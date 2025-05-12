@@ -92,11 +92,30 @@ class FileController extends Controller
         $totalInvalidLines = 0;
 
         $documentOriginalName = $file->getClientOriginalName();
+        $chunksFilename = date('Y-m-d_His') . "_[index]_" . $documentOriginalName;
+        $fileName = date('Y-m-d_His') . "_{$chunkIndex}_" . $documentOriginalName;
         $documentOriginalExtension = $file->getClientOriginalExtension();
         $uploadedAtUtc = Carbon::now();
         $uploadedAtBrasilia = Carbon::now('America/Sao_Paulo')->toIso8601String();
         $fileSize = $file->getSize();
         $totalLines = $this->countCsvLines($path);
+
+        $rootFile = File::create([
+            'filename' => $documentOriginalName,
+            'content_hash' => $contentHash,
+            'upload_date_brasilia_local_time' => $uploadedAtBrasilia,
+            'uploaded_metadata' => [
+                'original_file_size' => $fileSize,
+                'original_extension' => $documentOriginalExtension,
+            ],
+            'processing_info' => [
+                'number_of_chunks' => 0,
+                'chunk_total_lines' => $totalLines,
+                'valid_lines' => 0,
+                'invalid_lines' => 0,
+            ],
+            'type' => 'root',
+        ]);
 
         while (($row = fgetcsv($csvFile, null, ';')) !== false) {
             if (array_combine($header, $row) === false) {
@@ -113,7 +132,6 @@ class FileController extends Controller
                  */
                 $totalInvalidLines = $invalidLines;
 
-                $fileName = date('Y-m-d_His') . "_{$chunkIndex}_" . $documentOriginalName;
 
                 File::create([
                     'filename' => $fileName,
@@ -130,6 +148,8 @@ class FileController extends Controller
                         'invalid_lines' => $invalidLines,
                     ],
                     'data' => $data,
+                    'type' => 'chunk',
+                    'root_id' => $rootFile->id,
                 ]);
 
                 // prepare for next iteration
@@ -141,16 +161,15 @@ class FileController extends Controller
 
         // save remaining data not included in other chunks
         if (!empty($data)) {
-            $fileName = date('Y-m-d_His') . "_{$chunkIndex}_" . $documentOriginalName;
 
             File::create([
                 'filename' => $fileName,
-                "original_filename" => $documentOriginalName,
-                'upload_date_brasilia_local_time' => $uploadedAtBrasilia,
+                'original_filename' => $documentOriginalName,
                 'content_hash' => $contentHash,
+                'upload_date_brasilia_local_time' => $uploadedAtBrasilia,
                 'uploaded_metadata' => [
-                    "original_file_size" => $fileSize,
-                    "original_extension" => $documentOriginalExtension,
+                    'original_file_size' => $fileSize,
+                    'original_extension' => $documentOriginalExtension,
                 ],
                 'processing_info' => [
                     'chunk_total_lines' => $totalLines,
@@ -158,6 +177,8 @@ class FileController extends Controller
                     'invalid_lines' => $invalidLines,
                 ],
                 'data' => $data,
+                'type' => 'chunk',
+                'root_id' => $rootFile->id,
             ]);
         }
 
@@ -167,12 +188,25 @@ class FileController extends Controller
         $processingTimeMs = round(($end - $start) * 1000);
         $totalProcessingTimeMs += $processingTimeMs;
 
+        /**
+         * update the $rootFile entry with final data before return a response for the user
+         */
+        $rootFile->update([
+            'processing_info' => [
+                'number_of_chunks' => $chunkIndex,
+                'chunk_total_lines' => $totalLines,
+                'total_valid_lines' => ($totalLines - $invalidLines),
+                'total_invalid_lines' => $totalInvalidLines,
+            ],
+        ]);
+
+
         return response()->json([
             'message' => 'File uploaded and chunked successfully.',
             'content_hash' => $contentHash,
             'uploaded_metadata' => [
-                'original_filename' => $documentOriginalName,
-                'stored_as' => $fileName,
+                'root_filename' => $documentOriginalName,
+                'chunks_filename' => $chunksFilename,
                 'upload_date_brasilia_local_time' => $uploadedAtBrasilia,
                 'uploaded_at_utc' => $uploadedAtUtc,
                 'file_size' => $fileSize,

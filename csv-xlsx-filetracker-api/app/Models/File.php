@@ -14,4 +14,14 @@ class File extends Model
     protected $table = 'filetracker-api-service';
     protected $connection = 'mongodb';
     protected $guarded = [];
+
+    public function root()
+    {
+        return $this->belongsTo(File::class, 'root_id');
+    }
+
+    public function chunks()
+    {
+        return $this->hasMany(File::class, 'root_id');
+    }
 }
