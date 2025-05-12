@@ -8,7 +8,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/files/upload', [FileController::class, 'upload']);
+Route::post('/files', [FileController::class, 'upload']);
 
 /**
  * File Upload History.
@@ -16,4 +16,4 @@ Route::post('/files/upload', [FileController::class, 'upload']);
  * The user is able to search through the history of uploaded files.
  * Optional: Search by filename or reference date (upload date).
  */
-Route::get('/files/history', [FileController::class, 'history']);
+Route::get('/files', [FileController::class, 'history']);
