@@ -19,15 +19,15 @@ class FileController extends Controller
         $searchUploadDateUtc = $request->input('uploadDateUtc', null);
 
         if ($searchOriginalFilename !== null) {
-            
         }
 
         $paginated = File::orderBy('created_at', 'desc')
+            ->where('type', 'root')
             ->paginate($perPage)
             ->through(fn($item) => $item->makeHidden(['data', 'uploaded_metadata', 'processing_info']));
 
         return response()->json([
-            'message' => 'Uploaded File History queried successfully',
+            'message' => 'File upload history query completed successfully',
             'items' => $paginated->items(),
             'pagination' => [
                 'current_page' => $paginated->currentPage(),
