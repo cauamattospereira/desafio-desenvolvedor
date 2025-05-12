@@ -13,7 +13,7 @@ class FileController extends Controller
      */
     public function history(Request $request)
     {
-        $perPage = $request->input('per_page', 50);
+        $perPage = $request->input('per_page', 10);
         $searchOriginalFilename = $request->input('filename', null);
         $searchUploadDateBrasiliaLocalTime = $request->input('uploadDateBrasilia', null);
         $searchUploadDateUtc = $request->input('uploadDateUtc', null);
@@ -22,7 +22,7 @@ class FileController extends Controller
             
         }
 
-        $paginated = File::orderBy('upload_date_brasilia_local_time', 'desc')
+        $paginated = File::orderBy('created_at', 'desc')
             ->paginate($perPage)
             ->through(fn($item) => $item->makeHidden(['data', 'uploaded_metadata', 'processing_info']));
 
