@@ -32,6 +32,9 @@ A solução adotada para tal problema foi modelar os dados salvos no banco para 
 Para isso, adotei um modelo de relacionamento entre os documentos, onde, para cada arquivo CSV/XSLX que fosse subido no sistema, fosse criado um *documento pai (type: root)*, que possui diversos *documentos filhos (type: chunk)*. Dessa forma, ao invés de tentar salvar um grande documento de mais de 16mb, o arquivo é separado em documentos de até 10 mil linhas de dados. 
 
 Assim, os documentos filhos, *chunks* (representado pelo campo 'type': 'chunk'), possuem uma relação de vários para um com o documento raiz ('type': 'root'), expressa no campo 'root_id' dos documentos com tipo 'chunk'. Dessa forma, foi possível garantir boa legibilidade dos dados nas consultas. Também tornou possível realizar consultas buscando apenas os documentos pai, sem precisar buscar as informações de todos os documentos filhos.
+O número de chunks (partes) do arquivo original fica contido no documento root, e pode ser consultado através do campo "number_of_chunks"), assim como o total de linhas de dados do arquivo 'upado' (campo 'chunk_total_lines').
+
+Para evitar o upload de planilhas duplicadas, todos os documentos são armazenados com um hash unico (campo 'content_hash'), tornando possível da aplicação perceber quando o **conteúdo** da planilha é duplicado. Dessa forma, mesmo se você trocar o nome da planilha e tentar subi-la novamente, o sistema ainda assim irá detectar e impedir o upload, garantindo a unicidade dos dados no banco.
 
 
 ## 🚀 Endpoints
