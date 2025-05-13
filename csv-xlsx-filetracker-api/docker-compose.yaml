@@ -21,3 +21,20 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
       ME_CONFIG_BASICAUTH: false
+
+  app:
+    image: csv-xlsx-filetracker-api
+    container_name: php-app
+    restart: always
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/var/www/html 
+    environment:
+      - DB_CONNECTION=mongodb
+      - DB_URI=mongodb://root:example@mongo:27017
+      - DB_USERNAME=root
+      - DB_PASSWORD=example
+    depends_on:
+      - mongo
+      - mongo-express    
