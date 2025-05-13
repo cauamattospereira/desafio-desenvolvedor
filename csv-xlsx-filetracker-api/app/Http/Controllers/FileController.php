@@ -49,6 +49,50 @@ class FileController extends Controller
         ]);
     }
 
+    public function search(Request $request)
+    {
+        $tckrSymb = $request->query('TckrSymb');
+        $rptDt = $request->query('RptDt');
+        $perPage = $request->query('per_page', 100);
+
+        $files = File::where('type', 'chunk')->get();
+
+        $allItems = collect();
+        foreach ($files as $file) {
+            if (isset($file['data']) && is_array($file['data'])) {
+                $allItems = $allItems->merge($file['data']);
+            }
+        }
+
+        if ($tckrSymb) {
+            $allItems = $allItems->where('TckrSymb', $tckrSymb);
+        }
+        if ($rptDt) {
+            $allItems = $allItems->where('RptDt', $rptDt);
+        }
+
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $currentItems = $allItems->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $paginatedResults = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $allItems->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return response()->json([
+            'data' => $paginatedResults->items(),
+            'pagination' => [
+                'current_page' => $paginatedResults->currentPage(),
+                'per_page' => $paginatedResults->perPage(),
+                'total' => $paginatedResults->total(),
+                'last_page' => $paginatedResults->lastPage(),
+            ]
+        ]);
+    }
+
 
     /**
      * Function for uploading a CSV/Excel file
