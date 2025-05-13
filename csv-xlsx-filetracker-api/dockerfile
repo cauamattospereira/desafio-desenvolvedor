@@ -1,0 +1,48 @@
+FROM php:8.3-cli-alpine
+
+RUN apk update && \
+    apk add --no-cache \
+    git \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    oniguruma-dev \
+    postgresql-dev \
+    autoconf \
+    g++ \
+    make
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install \
+    pdo_mysql \
+    pdo_pgsql \
+    zip \
+    gd \
+    mbstring \
+    opcache
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY . .
+
+RUN echo php --ini
+
+COPY /docker/php.ini /usr/local/etc/php/8.3/cli/
+
+RUN pecl install mongodb && \
+    docker-php-ext-enable mongodb
+
+RUN composer update
+
+RUN composer install --optimize-autoloader --no-dev
+
+RUN chown -R www-data:www-data /var/www/html/storage && \
+    chown -R www-data:www-data /var/www/html/bootstrap/cache
+
+RUN php artisan key:generate
+
+EXPOSE 8000
+
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

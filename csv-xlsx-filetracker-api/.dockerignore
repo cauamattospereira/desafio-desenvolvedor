@@ -1,0 +1,8 @@
+/node_modules
+/vendor
+/.git
+/.github
+/.idea
+/.vscode
+/storage/*.key
+docker-compose.override.yml
