@@ -14,6 +14,6 @@
     - [X] Return all the uploaded files ordered by Brasilia upload date
     - [X] Add support for filter by filename 
     - [X] Add support for filter by reference date (Brasilia upload date) 
-- [ ] Create the Search Content route
-    - [ ] User can pass custom pagination and per page items limit
-    - [ ] Support filters for `TckrSymb` (Ticker Symbol) and `RptDt` (Report Date)
+- [X] Create the Search Content route
+    - [X] User can pass custom pagination and per page items limit
+    - [X] Support filters for `TckrSymb` (Ticker Symbol) and `RptDt` (Report Date)
