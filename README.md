@@ -11,10 +11,10 @@ Para realizar o deploy local você irá precisar estar em um ambiente Linux/WSL 
 
 ### Tecnologias e estrutura do projeto
 #### Tecnologias
-Linguagem: PHP
-Framework: Laravel
-Banco de dados: MongoDB
-Extra: Docker, Git
+- Linguagem: PHP
+- Framework: Laravel
+- Banco de dados: MongoDB
+- Extra: Docker, Git com conventional commits
 
 #### Estrutura do projeto 
 O principal desafio para este projeto foi conseguir realizar o adequado tratamento das informações advindas dos arquivos CSV/XLSX, buscando garantir 100% de funcionalidade em planilhas com centenas de milhares de linhas de dados.
