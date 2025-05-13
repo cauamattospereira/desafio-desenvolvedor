@@ -13,36 +13,41 @@ class FileController extends Controller
      */
     public function history(Request $request)
     {
-        $perPage = $request->input('per_page', 10);
-        $searchOriginalFilename = $request->input('filename', null);
-        $searchUploadDateBrasiliaLocalTime = $request->input('uploadDateBrasilia', null);
-        $searchUploadDateUtc = $request->input('uploadDateUtc', null);
+        $searchOriginalFilename = $request->input('filename');
+        $searchUploadDateBrasiliaLocalTime = $request->input('referenceDateBrasilia');
+        $searchUploadDateUtc = $request->input('referenceDateUtc');
 
-        if ($searchOriginalFilename !== null) {
+        $query = File::orderBy('created_at', 'desc')
+            ->where('type', 'root');
+
+        if ($searchOriginalFilename) {
+            $query->where('filename', $searchOriginalFilename);
         }
 
-        $paginated = File::orderBy('created_at', 'desc')
-            ->where('type', 'root')
-            ->paginate($perPage)
-            ->through(fn($item) => $item->makeHidden(['data', 'uploaded_metadata', 'processing_info']));
+        if ($searchUploadDateBrasiliaLocalTime) {
+            $start = Carbon::parse($searchUploadDateBrasiliaLocalTime)->startOfDay()->setTimezone('America/Sao_Paulo')->toIso8601String();
+            $end = Carbon::parse($searchUploadDateBrasiliaLocalTime)->endOfDay()->setTimezone('America/Sao_Paulo')->toIso8601String();
+
+            $query->whereBetween('upload_date_brasilia_local_time', [$start, $end]);
+        }
+
+        if ($searchUploadDateUtc) {
+            $start = Carbon::parse($searchUploadDateUtc)->startOfDay();
+            $end = Carbon::parse($searchUploadDateUtc)->endOfDay();
+
+            $query->whereBetween('created_at', [$start, $end]);
+        }
+
+        $data = $query->get()->makeHidden(['data', 'uploaded_metadata', 'processing_info']);
 
         return response()->json([
             'message' => 'File upload history query completed successfully',
-            'items' => $paginated->items(),
-            'pagination' => [
-                'current_page' => $paginated->currentPage(),
-                'per_page' => $paginated->perPage(),
-                'total' => $paginated->total(),
-                'last_page' => $paginated->lastPage(),
-                'next_page_url' => $paginated->nextPageUrl(),
-                'prev_page_url' => $paginated->previousPageUrl(),
-                'from' => $paginated->firstItem(),
-                'to' => $paginated->lastItem(),
-            ],
+            'data' => $data,
             'status' => 200,
             'success' => true,
         ]);
     }
+
 
     /**
      * Function for uploading a CSV/Excel file
