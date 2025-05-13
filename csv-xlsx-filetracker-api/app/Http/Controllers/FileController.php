@@ -53,7 +53,7 @@ class FileController extends Controller
     {
         $tckrSymb = $request->query('TckrSymb');
         $rptDt = $request->query('RptDt');
-        $perPage = $request->query('per_page', 100);
+        $perPage = $request->query('per_page', default: 50);
 
         $files = File::where('type', 'chunk')->get();
 
