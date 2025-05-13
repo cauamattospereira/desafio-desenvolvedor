@@ -34,6 +34,8 @@ RUN yes '' | pecl install mongodb && \
 
 RUN composer install --optimize-autoloader --no-dev
 
+RUN mv .env.example .env
+
 RUN php artisan key:generate
 
 EXPOSE 8000
