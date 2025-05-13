@@ -1,23 +1,28 @@
-# CSV-XLSX-FILETRACKER-API
+# 🚀 CSV-XLSX-FILETRACKER-API
 
-### Deploy local
+## 🐳 Deploy local
 Para realizar o deploy local você irá precisar estar em um ambiente Linux/WSL e ter o Docker instalado em seu ambiente, após isso, basta seguir os passos abaixo:
 1. Clonar o repositório com `git@github.com:cauamattospereira/desafio-desenvolvedor.git`
 2. Trocar para a branch caua-de-mattos-pereira com `git switch caua-de-mattos-pereira`
 3. Acessar a pasta csv-xlsx-filetracker-api com `cd csv-xlsx-filetracker-api` 
-4. Fazer deploy local dos containers utilizando `sudo docker compose up -d`
+4. Fazer deploy local dos containers utilizando `sudo docker compose up -d` <br>
+    **Esse comando irá realizar o deploy de:** <br>
+    - **Imagem PHP**: já pronta com todas as configurações necessárias do projeto, incluindo php.ini personalizado.
+    - **MongoDB**: A imagem docker oficial do MongoDB
+    - **MongoExpress**: Para visualização e controle rápido sobre o banco     
 5. A API irá rodar na porta lógica 8000. Você saberá que a mesma está sendo executado ao acessar http://localhost:8000 em seu navegador e conseguir ver a tela inicial do Laravel.
 6. Após isso, basta testar os endpoints com Postman, Imsomnia ou qualquer outro client HTTP.
 
-### Tecnologias e estrutura do projeto
-#### Tecnologias
-- Linguagem: PHP
-- Framework: Laravel
-- Banco de dados: MongoDB
-- Infraestrutura: Docker]
-- Versionamento: Git com utilização de conventional commits
+## 👨‍💻 Tecnologias e estrutura do projeto
+### Tecnologias
+- 🐘 Linguagem: PHP
+- 🐘 Framework: Laravel
+- 🥬 Banco de dados: MongoDB
+- 🐳 Infraestrutura: Docker]
+- 🔃 Versionamento: Git com utilização de conventional commits
 
-#### Estrutura do projeto 
+### 📁 Estrutura do projeto
+---
 O principal desafio para este projeto foi conseguir realizar o adequado tratamento das informações advindas dos arquivos CSV/XLSX, buscando garantir 100% de funcionalidade em planilhas com centenas de milhares de linhas de dados.
 
 De início, ao tentar salvar um arquivo CSV com cerca de 300 mil linhas, acabei esbarrando na limitação do MongoDB de 16mb por documento.
@@ -28,19 +33,18 @@ Para isso, adotei um modelo de relacionamento entre os documentos, onde, para ca
 
 Assim, os documentos filhos, *chunks* (representado pelo campo 'type': 'chunk'), possuem uma relação de vários para um com o documento raiz ('type': 'root'), expressa no campo 'root_id' dos documentos com tipo 'chunk'. Dessa forma, foi possível garantir boa legibilidade dos dados nas consultas. Também tornou possível realizar consultas buscando apenas os documentos pai, sem precisar buscar as informações de todos os documentos filhos.
 
-### Endpoints 
-A API contém 3 endpoints:
-#### *POST api/files:* 
-Rota para upload de arquivos. Aceita uma requisição POST com um form-data com chave "file" e um arquivo CSV/XLSX como valor.
 
-Tipo de requisição: multipart/form-data
-
-Campo esperado: file
-
-**Requisição**
+## 🚀 Endpoints
+---
+A API contém **3 endpoints**:
+### **POST api/files:** 
+Rota para upload de arquivos. Aceita uma requisição POST com um form-data com chave "file" e um arquivo CSV/XLSX como valor.<br>
+**Tipo de requisição:** multipart/form-data <br>
+**Campo esperado:** file<br>
+#### **Requisição**
 ![image](https://github.com/user-attachments/assets/ba7108d9-fbaa-419e-a78a-306343a3fe44)
 
-**Retorno**
+#### **Retorno**
 ```json
 {
     "message": "File uploaded and chunked successfully.",
@@ -63,7 +67,7 @@ Campo esperado: file
     "success": true
 }
 ```
-E caso você tente subir um arquivo duplicado:
+#### **Em caso de tentar fazer upload de um arquivo duplicado:**
 ```json
 {
     "error": "Duplicated file",
@@ -89,12 +93,10 @@ E caso você tente subir um arquivo duplicado:
 }
 ```
 
----
 
-#### *GET api/files*:
-Rota para consulta de histórico de arquivos enviados para o sistema.
-
-Aceita os parâmetros para busca por filename ou reference date.
+### **GET api/files**:
+Rota para consulta de histórico de arquivos enviados para o sistema. <br>
+Aceita os parâmetros para busca por **filename** ou **reference date**.
 
 ##### Parâmetros:
 
@@ -104,10 +106,10 @@ Aceita os parâmetros para busca por filename ou reference date.
 | referenceDateBrasilia | Todos os arquivos do dia em questão, usando como base o campo "reference_brasilia_upload_date"         | /api/files?referenceDateBrasilia=2025-05-12 |
 | referenceDateUtc      | Todos os arquivos do dia em questão, usando como base o campo "created_at"                             | /api/files?referenceDateUtx=2025-05-12      |
 
-**Requisição**
+#### **Requisição**
 ![image](https://github.com/user-attachments/assets/786a3827-a459-48d1-822c-c4caa6fdb6f0)
 
-**Retorno**
+#### **Retorno**
 ```json
 {
     "message": "File upload history query completed successfully",
@@ -147,14 +149,14 @@ Aceita os parâmetros para busca por filename ou reference date.
 
 ---
 
-*GET /api/files/upload*
+### **GET /api/files/upload**
 Essa rota busca as informações que foram disponibilizadas pelos arquivos que foram 'upados'. Por padrão, ela traz um array com 50 items por página. Você pode personalizar a quantidade de items retornados por página enviando o parâmetro `per_page`. Claramente, também é possível escolher a página desejada da paginação através do parâmetro `page`.
 Essa rota também suporta filtros por `TckrSymb` (Ticker Symbol) e `RptDt` (Report Date).
 
-**Requisição**
+#### **Requisição**
 ![image](https://github.com/user-attachments/assets/4b874ce8-426e-49c9-9a55-52ba5bd543c6)
 
-**Retorno**
+#### **Retorno**
 ```json
 {
     "data": [
@@ -277,11 +279,11 @@ Essa rota também suporta filtros por `TckrSymb` (Ticker Symbol) e `RptDt` (Repo
 }
 ```
 
-Filtrando por `TckrSymb`:
-**Requisição**
+#### **Filtrando por `TckrSymb`:**
+##### **Requisição**
 ![image](https://github.com/user-attachments/assets/b4486a1a-011d-48ea-a8ea-43ec40b271f1)
 
-**Retorno**
+##### **Retorno**
 ```json
 {
     "data": [
@@ -349,11 +351,10 @@ Filtrando por `TckrSymb`:
 }
 ```
 
-Filtrando por `RptDt`:
-**Requisição**
+#### **Filtrando por `RptDt`:**
+##### **Requisição**
 
-
-**Retorno**
+##### **Retorno**
 ```json
 {
     "data": [
