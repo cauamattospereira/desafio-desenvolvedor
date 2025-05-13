@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FileController extends Controller
 {
@@ -67,10 +68,23 @@ class FileController extends Controller
             ], 400);
         }
 
+        /**
+         * This variables are necessary for validate the file
+         */
         $file = $request->file('file');
+        $extension = $file->getClientOriginalExtension();
         $contentHash = md5_file($file->getRealPath());
 
+        if ($extension !== 'csv' && $extension !== 'xlsx') {
+            return response()->json([
+                'error' => 'Invalid file type',
+                'message' => 'Only CSV and Excel files are supported.',
+                'success' => false,
+            ], 400);
+        }
+
         $duplicate = File::where('content_hash', $contentHash)->first();
+
         if ($duplicate) {
             $duplicate->makeHidden(['data']);
 
@@ -82,20 +96,14 @@ class FileController extends Controller
             ], 409);
         }
 
-        $path = $file->getRealPath();
-        $csvFile = fopen($path, 'r');
-
-        fgetcsv($csvFile, null, ';'); // Skip first line of the file (the file for test have a 'Status do arquivo' header)
-        $header = fgetcsv($csvFile, null, ';'); // Read real header
-
         $linesPerChunk = 10000;
         $chunkIndex = 1;
         $rowCount = 0;
         $data = [];
-        $invalidLines = 0;
         $totalProcessingTimeMs = 0;
         $totalInvalidLines = 0;
-
+                
+        $path = $file->getRealPath();
         $documentOriginalName = $file->getClientOriginalName();
         $chunksFilename = date('Y-m-d_His') . "_[index]_" . $documentOriginalName;
         $fileName = date('Y-m-d_His') . "_{$chunkIndex}_" . $documentOriginalName;
@@ -104,6 +112,7 @@ class FileController extends Controller
         $uploadedAtBrasilia = Carbon::now('America/Sao_Paulo')->toIso8601String();
         $fileSize = $file->getSize();
         $totalLines = $this->countCsvLines($path);
+        
 
         $rootFile = File::create([
             'filename' => $documentOriginalName,
@@ -117,52 +126,52 @@ class FileController extends Controller
                 'number_of_chunks' => 0,
                 'chunk_total_lines' => $totalLines,
                 'valid_lines' => 0,
-                'invalid_lines' => 0,
             ],
             'type' => 'root',
         ]);
 
-        while (($row = fgetcsv($csvFile, null, ';')) !== false) {
-            if (array_combine($header, $row) === false) {
-                $invalidLines += 1;
+        $rows = [];
+
+        if ($extension === 'csv') {
+            $csvFile = fopen($path, 'r');
+            
+            fgetcsv($csvFile, null, ';'); // Skip first line of the file (the file for test have a 'Status do arquivo' header)
+            $header = fgetcsv($csvFile, null, ';'); // Read real header
+
+            while (($row = fgetcsv($csvFile, null, ';')) !== false) {
+                $rows[] = array_combine($header, $row);
             }
 
-            $data[] = array_combine($header, $row);
+            fclose($csvFile);
+        }
 
-            $rowCount++;
+        if ($extension === 'xlsx') {
+            $collection = Excel::toCollection(null, $file)->first();
 
-            if ($rowCount % $linesPerChunk === 0) {
-                /**
-                 * logic for calculation the time it took for process the file
-                 */
-                $totalInvalidLines = $invalidLines;
+            $header = $collection->get(1)->toArray(); // skip the first header ('Status do arquivo') and get the real header
+            $collection = $collection->slice(2); // start on line 2
 
+            foreach ($collection as $row) {
+                $rowArray = $row->toArray();
 
-                File::create([
-                    'filename' => $fileName,
-                    'original_filename' => $documentOriginalName,
-                    'content_hash' => $contentHash,
-                    'upload_date_brasilia_local_time' => $uploadedAtBrasilia,
-                    'uploaded_metadata' => [
-                        'original_file_size' => $fileSize,
-                        'original_extension' => $documentOriginalExtension,
-                    ],
-                    'processing_info' => [
-                        'chunk_total_lines' => $totalLines,
-                        'valid_lines' => count($data),
-                        'invalid_lines' => $invalidLines,
-                    ],
-                    'data' => $data,
-                    'type' => 'chunk',
-                    'root_id' => $rootFile->id,
-                ]);
-
-                // prepare for next iteration
-                $chunkIndex++;
-                $invalidLines = 0;
-                $data = [];
+                if (count($rowArray) === count($header)) {
+                    $rows[] = array_combine($header, $rowArray);
+                }
             }
         }
+        
+        if ($extension === 'xlsx') {
+            $collection = Excel::toCollection(null, $file)->first();
+
+            $header = $collection->get(1)->toArray();
+            $collection = $collection->slice(2); 
+
+            foreach ($collection as $row) {
+                if (count($row) === count($header)) {
+                    $rows[] = array_combine($header, $row->toArray());
+                }
+            }
+        } 
 
         // save remaining data not included in other chunks
         if (!empty($data)) {
@@ -179,7 +188,6 @@ class FileController extends Controller
                 'processing_info' => [
                     'chunk_total_lines' => $totalLines,
                     'valid_lines' => count($data),
-                    'invalid_lines' => $invalidLines,
                 ],
                 'data' => $data,
                 'type' => 'chunk',
@@ -187,7 +195,6 @@ class FileController extends Controller
             ]);
         }
 
-        fclose($csvFile);
 
         $end = microtime(true);
         $processingTimeMs = round(($end - $start) * 1000);
@@ -200,8 +207,6 @@ class FileController extends Controller
             'processing_info' => [
                 'number_of_chunks' => $chunkIndex,
                 'chunk_total_lines' => $totalLines,
-                'total_valid_lines' => ($totalLines - $invalidLines),
-                'total_invalid_lines' => $totalInvalidLines,
             ],
         ]);
 
@@ -221,8 +226,6 @@ class FileController extends Controller
                 'chunk_total_lines' => $totalLines,
                 'total_chunks' => $chunkIndex,
                 'total_lines' => $totalLines,
-                'total_valid_lines' => ($totalLines - $invalidLines),
-                'total_invalid_lines' => $totalInvalidLines,
                 'total_processing_time_ms' => $totalProcessingTimeMs,
             ],
             'status' => 201,
