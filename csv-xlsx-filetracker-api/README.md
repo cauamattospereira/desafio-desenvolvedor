@@ -2,7 +2,8 @@
 - [X] Prepare and deploy MongoDB docker container with MongoExpress using Docker Compose
 - [X] Integrate MongoDB docker container as the database of the Laravel application
 - [X] Create the CSV/Excel file uploader route
-    - [X] User is able to upload CSV and XLSX file
+    - [X] User is able to upload CSV file
+    - [X] User is able to upload XLSX file
     - [X] User have a JSON response with the content paginated
     - [X] User have a JSON response with the total of lines in the CSV/Excel in files with big amount of lines
     - [X] When the user upload the file, the JSON is saved as a document in MongoDB
