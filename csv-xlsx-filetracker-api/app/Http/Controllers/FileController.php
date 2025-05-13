@@ -101,8 +101,7 @@ class FileController extends Controller
         $rowCount = 0;
         $data = [];
         $totalProcessingTimeMs = 0;
-        $totalInvalidLines = 0;
-                
+
         $path = $file->getRealPath();
         $documentOriginalName = $file->getClientOriginalName();
         $chunksFilename = date('Y-m-d_His') . "_[index]_" . $documentOriginalName;
@@ -112,7 +111,7 @@ class FileController extends Controller
         $uploadedAtBrasilia = Carbon::now('America/Sao_Paulo')->toIso8601String();
         $fileSize = $file->getSize();
         $totalLines = $this->countCsvLines($path);
-        
+
 
         $rootFile = File::create([
             'filename' => $documentOriginalName,
@@ -130,16 +129,53 @@ class FileController extends Controller
             'type' => 'root',
         ]);
 
-        $rows = [];
-
         if ($extension === 'csv') {
             $csvFile = fopen($path, 'r');
-            
-            fgetcsv($csvFile, null, ';'); // Skip first line of the file (the file for test have a 'Status do arquivo' header)
-            $header = fgetcsv($csvFile, null, ';'); // Read real header
+
+            fgetcsv($csvFile, null, ';'); // Skip first line (Status do arquivo)
+            $header = fgetcsv($csvFile, null, ';'); // Now read real header
 
             while (($row = fgetcsv($csvFile, null, ';')) !== false) {
-                $rows[] = array_combine($header, $row);
+                $data[] = array_combine($header, $row);
+                $rowCount++;
+
+                if ($rowCount % $linesPerChunk === 0) {
+                    File::create([
+                        'filename' => $fileName,
+                        'original_filename' => $documentOriginalName,
+                        'content_hash' => $contentHash,
+                        'upload_date_brasilia_local_time' => $uploadedAtBrasilia,
+                        'uploaded_metadata' => [
+                            'original_file_size' => $fileSize,
+                            'original_extension' => $documentOriginalExtension,
+                        ],
+                        'data' => $data,
+                        'type' => 'chunk',
+                        'root_id' => $rootFile->id,
+                    ]);
+
+                    $chunkIndex++;
+                    $data = [];
+                }
+            }
+
+
+            // save remaining data not included in other chunks
+            if (!empty($data)) {
+
+                File::create([
+                    'filename' => $fileName,
+                    'original_filename' => $documentOriginalName,
+                    'content_hash' => $contentHash,
+                    'upload_date_brasilia_local_time' => $uploadedAtBrasilia,
+                    'uploaded_metadata' => [
+                        'original_file_size' => $fileSize,
+                        'original_extension' => $documentOriginalExtension,
+                    ],
+                    'data' => $data,
+                    'type' => 'chunk',
+                    'root_id' => $rootFile->id,
+                ]);
             }
 
             fclose($csvFile);
@@ -159,19 +195,19 @@ class FileController extends Controller
                 }
             }
         }
-        
+
         if ($extension === 'xlsx') {
             $collection = Excel::toCollection(null, $file)->first();
 
             $header = $collection->get(1)->toArray();
-            $collection = $collection->slice(2); 
+            $collection = $collection->slice(2);
 
             foreach ($collection as $row) {
                 if (count($row) === count($header)) {
                     $rows[] = array_combine($header, $row->toArray());
                 }
             }
-        } 
+        }
 
         // save remaining data not included in other chunks
         if (!empty($data)) {
