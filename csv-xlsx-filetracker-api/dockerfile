@@ -32,8 +32,6 @@ COPY /docker/php.ini /usr/local/etc/php/php.ini
 RUN yes '' | pecl install mongodb-1.21.0 && \
     docker-php-ext-enable mongodb
 
-RUN composer update
-
 RUN composer install --optimize-autoloader --no-dev
 
 RUN php artisan key:generate

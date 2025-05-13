@@ -23,13 +23,15 @@ services:
       ME_CONFIG_BASICAUTH: false
 
   app:
-    image: csv-xlsx-filetracker-api
+    build:
+      context: .
+      dockerfile: dockerfile
     container_name: php-app
     restart: always
+    expose:
+      - 8000
     ports:
-      - 8000:8000
-    volumes:
-      - .:/var/www/html 
+      - "8000:8000"
     environment:
       - DB_CONNECTION=mongodb
       - DB_URI=mongodb://root:example@mongo:27017
@@ -37,4 +39,4 @@ services:
       - DB_PASSWORD=example
     depends_on:
       - mongo
-      - mongo-express    
+      - mongo-express
