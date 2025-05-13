@@ -29,7 +29,7 @@ COPY . .
 
 COPY /docker/php.ini /usr/local/etc/php/php.ini
 
-RUN yes '' | pecl install mongodb-1.21.0 && \
+RUN yes '' | pecl install mongodb && \
     docker-php-ext-enable mongodb
 
 RUN composer install --optimize-autoloader --no-dev
