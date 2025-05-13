@@ -104,7 +104,7 @@ Aceita os parâmetros para busca por **filename** ou **reference date**.
 | --------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
 | filename              | O exato arquivo pesquisado caso ele exista no banco de dados ou uma mensagem de arquivo não encontrado | /api/files?filename=arquivo_exemplo.csv     |
 | referenceDateBrasilia | Todos os arquivos do dia em questão, usando como base o campo "reference_brasilia_upload_date"         | /api/files?referenceDateBrasilia=2025-05-12 |
-| referenceDateUtc      | Todos os arquivos do dia em questão, usando como base o campo "created_at"                             | /api/files?referenceDateUtx=2025-05-12      |
+| referenceDateUtc      | Todos os arquivos do dia em questão, usando como base o campo "created_at"                             | /api/files?referenceDateUtc=2025-05-12      |
 
 #### **Requisição**
 ![image](https://github.com/user-attachments/assets/786a3827-a459-48d1-822c-c4caa6fdb6f0)
@@ -149,7 +149,7 @@ Aceita os parâmetros para busca por **filename** ou **reference date**.
 
 ---
 
-### **GET /api/files/upload**
+### **GET /api/files/search**
 Essa rota busca as informações que foram disponibilizadas pelos arquivos que foram 'upados'. Por padrão, ela traz um array com 50 items por página. Você pode personalizar a quantidade de items retornados por página enviando o parâmetro `per_page`. Claramente, também é possível escolher a página desejada da paginação através do parâmetro `page`.
 Essa rota também suporta filtros por `TckrSymb` (Ticker Symbol) e `RptDt` (Report Date).
 
