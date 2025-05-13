@@ -79,6 +79,8 @@ E caso você tente subir um arquivo duplicado:
 }
 ```
 
+---
+
 #### *GET api/files*:
 Rota para consulta de histórico de arquivos enviados para o sistema.
 
@@ -132,6 +134,8 @@ Aceita os parâmetros para busca por filename ou reference date.
     "success": true
 }
 ```
+
+---
 
 *GET /api/files/upload*
 Essa rota busca as informações que foram disponibilizadas pelos arquivos que foram 'upados'. Por padrão, ela traz um array com 50 items por página. Você pode personalizar a quantidade de items retornados por página enviando o parâmetro `per_page`. Claramente, também é possível escolher a página desejada da paginação através do parâmetro `page`.
@@ -462,7 +466,7 @@ Filtrando por `RptDt`:
 }
 ```
 
-
+---
 
 ### Roadmap
 - [X] Prepare and deploy MongoDB docker container with MongoExpress using Docker Compose
