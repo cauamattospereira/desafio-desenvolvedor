@@ -8,9 +8,11 @@
     - [X] When the user upload the file, the JSON is saved as a document in MongoDB
     - [X] Store chunks of files with more than 10000 lines
     - [X] Add a validation to consider invalid lines in the file
-- [ ] Create the File Upload History route
-    - [ ] Add support for filter by filename and reference date
+- [X] Create the File Upload History route
+    - [X] Add support for filter by filename and reference date
+    - [X] Return all the uploaded files ordered by Brasilia upload date
+    - [X] Add support for filter by filename 
+    - [X] Add support for filter by reference date (Brasilia upload date) 
 - [ ] Create the Search Content route
     - [ ] User can pass custom pagination and per page items limit
     - [ ] Support filters for `TckrSymb` (Ticker Symbol) and `RptDt` (Report Date)
-- [ ] Implement authentication
