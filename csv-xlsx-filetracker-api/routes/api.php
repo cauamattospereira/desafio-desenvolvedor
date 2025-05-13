@@ -12,9 +12,11 @@ Route::get('/user', function (Request $request) {
  * File upload route
  * Support CSV/XLSX files
  * 
+ * The CSV file need to be separated by ';', other separator logic is not implemented.
+ * 
  * The uploaded file are breaked in chunks and root document.
  * The root document have the filename of the original file uploaded.
- * The chunks documents have the filename composed by YYYY-MM-DD_{$chunkIndex}_$documentOriginalName;
+ * The chunks documents have the filename composed by YYYY-MM-DD_{$chunkIndex}_$documentOriginalName
  * 
  * Chunks documents are limited to 10000 lines per document. This limit is needed to not surpass the
  * max limit size for documents on MongoDB (16mb per document) 
@@ -34,3 +36,5 @@ Route::post('/files', [FileController::class, 'upload']);
  *      UTC: YYYY-MM-DD -> return the query based on created_at field
  */
 Route::get('/files', [FileController::class, 'history']);
+
+Route::get('/files/search', [FileController::class, 'search']);
