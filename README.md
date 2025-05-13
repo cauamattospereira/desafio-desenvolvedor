@@ -1,5 +1,14 @@
 # CSV-XLSX-FILETRACKER-API
 
+### Deploy local
+Para realizar o deploy local você irá precisar estar em um ambiente Linux/WSL e ter o Docker instalado em seu ambiente, após isso, basta seguir os passos abaixo:
+1. Clonar o repositório com `git@github.com:cauamattospereira/desafio-desenvolvedor.git`
+2. Trocar para a branch caua-de-mattos-pereira com `git switch caua-de-mattos-pereira`
+3. Acessar a pasta csv-xlsx-filetracker-api com `cd csv-xlsx-filetracker-api` 
+4. Fazer deploy local dos containers utilizando `sudo docker compose up -d`
+5. A API irá rodar na porta lógica 8000. Você saberá que a mesma está sendo executado ao acessar http://localhost:8000 em seu navegador e conseguir ver a tela inicial do Laravel.
+6. Após isso, basta testar os endpoints com Postman, Imsomnia ou qualquer outro client HTTP.
+
 ### Tecnologias e estrutura do projeto
 #### Tecnologias
 Linguagem: PHP
